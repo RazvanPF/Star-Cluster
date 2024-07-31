@@ -1,0 +1,170 @@
+/* starcluster.css */
+
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+#starCluster {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    max-width: 1000px;
+}
+
+.star {
+    width: 100px;
+    height: 100px;
+    margin: 10px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+.star:hover {
+    transform: scale(1.1);
+    background-color: #444;
+}
+
+body, html {
+    margin: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+}
+#renderCanvas {
+    width: 100%;
+    height: 100%;
+}
+.label {
+    position: absolute;
+    color: white;
+    pointer-events: none;
+}
+
+/* Sidebar styles */
+#sidebar {
+    position: fixed;
+    left: -350px; /* Adjusted for the left position */
+    width: 300px;
+    height: 80%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 128, 1);
+    padding: 20px;
+    overflow-y: auto;
+    transition: left 0.5s; /* Slide-in animation */
+    font-family: "Poppins", sans-serif; /* Set font family */
+    font-weight: 300; /* Light font weight */
+    text-transform: uppercase; /* Uppercase transformation */
+}
+
+#sidebar h2,
+#sidebar p,
+#sidebar .sidebar-content {
+    text-transform: uppercase; /* Apply uppercase transformation */
+}
+
+#sidebar h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+#sidebar p {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+#sidebar .sidebar-content {
+    margin-bottom: 20px;
+}
+
+#sidebar #visit-system-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 1);
+    color: white;
+    text-align: center;
+    border: 1px solid rgba(0, 0, 128, 1);
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase; 
+    transition: transform 0.3s ease; 
+    margin-top: 50px;
+}
+
+#sidebar #visit-system-button:hover {
+    transform: translateX(5px); 
+}
+
+#close-sidebar-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#star-image {
+max-width: 276px;
+max-height: 250px;
+width: auto;
+height: auto;
+display: block;
+margin: 0 auto; /* Center the image horizontally */
+}
+
+.babylon-tooltip {
+position: absolute;
+pointer-events: none;
+transform: translate(-50%, -100%);
+z-index: 10; /* Ensure the tooltip is on top */
+}
+
+#tooltipContainer {
+position: absolute;
+pointer-events: none;
+z-index: 10;
+}
+
+/* Keyframes for digital appearance effect */
+@keyframes digital-appear {
+    0% { opacity: 0; }
+    1% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+.digital-appear {
+    animation: digital-appear 0.5s step-end forwards;
+}
+
+/* General styles for star labels */
+.star-label {
+    font-family: "Poppins", sans-serif;
+    font-weight: 300;
+    text-transform: uppercase;
+    color: white;
+    font-size: 18px;
+}

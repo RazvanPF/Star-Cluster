@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
+    <link href="starcluster.css" rel="stylesheet" />
+    <title>Star Cluster</title>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-content">
+            <button id="close-sidebar-button">X</button>
+            <h2 id="star-name"></h2>
+            <img id="star-image" src="" alt="Star Image" />
+            <p id="star-description"></p>
+            <p><strong>Type:</strong> <span id="star-type"></span></p>
+            <p><strong>Age:</strong> <span id="star-age"></span></p>
+            <p><strong>Planets and Moons:</strong> <span id="star-planets-moons"></span></p>
+            <p><strong>Danger Level:</strong> <span id="star-danger-level"></span></p>
+            <button id="visit-system-button">Visit System</button>
+        </div>
+    </div>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="starCluster.js"></script>
+</body>
+</html>
