@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 position: new BABYLON.Vector3(0, 0, 0), 
                 size: 2, 
                 color: new BABYLON.Color3(1, 1, 0), 
-                system: "../Star%20Cluster/solarSystem1SOL/solarsystem1.html",
+                system: "solarSystem1SOL/solarsystem1.html",
                 description: "The Sun, a G-type main-sequence star, dominates the central region of this solar system. This nearly perfect sphere of hot plasma exhibits internal convective motion, generating a magnetic field via a dynamo process.",
                 type: "G-type Main-Sequence Star (G2V)",
                 age: "4.6 billion years",
