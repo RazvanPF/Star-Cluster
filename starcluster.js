@@ -162,7 +162,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }, 100); // Adjust the speed by changing the interval time
         }
-
         const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
         starData.forEach(star => {
