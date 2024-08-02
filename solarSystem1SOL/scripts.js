@@ -2275,6 +2275,7 @@ function hideUIElements() {
     document.getElementById('versionText').style.display = 'none';
     document.getElementById('speedSliderContainer').style.display = 'none';
     document.getElementById('sidebar').style.display = 'none';
+    document.getElementById('returnToClusterButton').style.display = 'none';
     cameraIcon.style.pointerEvents = 'none'; // Disable interactions
     cameraIcon.style.opacity = '0.5'; // Visually indicate it's disabled
 }
@@ -2284,6 +2285,7 @@ function showUIElements() {
     document.getElementById('versionText').style.display = 'block';
     document.getElementById('speedSliderContainer').style.display = 'flex';
     document.getElementById('sidebar').style.display = 'block';
+    document.getElementById('returnToClusterButton').style.display = 'block';
     cameraIcon.style.pointerEvents = 'auto'; // Enable interactions
     cameraIcon.style.opacity = '1'; // Reset opacity
 }
@@ -2309,3 +2311,17 @@ function takeScreenshot() {
 
 // Add event listener to the camera icon
 document.getElementById('cameraIcon').addEventListener('click', takeScreenshot);
+
+// Star Cluster return icon
+
+document.getElementById('returnToClusterButton').addEventListener('click', function() {
+    document.getElementById('returnPopup').style.display = 'block';
+});
+
+document.getElementById('confirmReturn').addEventListener('click', function() {
+    window.location.href = 'https://razvanpf.github.io/Star-Cluster/'; // Redirect to the root or index.html
+});
+
+document.getElementById('cancelReturn').addEventListener('click', function() {
+    document.getElementById('returnPopup').style.display = 'none';
+});

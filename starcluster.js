@@ -354,16 +354,27 @@ starData.forEach(star => {
         engine.resize();
     });
 
+
 // Function to animate text appearance with adjustable speed
-function animateHTMLElementText(element, text, speed) {
+const textAnimationIntervals = {};
+
+function animateHTMLElementText(elementId, text, speed) {
+    const element = document.getElementById(elementId);
+    if (!element) return; // Guard clause if element does not exist
+
+    // Clear any existing interval to prevent overlap
+    if (textAnimationIntervals[elementId]) {
+        clearInterval(textAnimationIntervals[elementId]);
+    }
+
     element.textContent = ""; // Clear initial text
     let index = 0;
-    const interval = setInterval(() => {
+    textAnimationIntervals[elementId] = setInterval(() => {
         if (index < text.length) {
-            element.textContent += text[index];
-            index++;
+            element.textContent += text[index++];
         } else {
-            clearInterval(interval);
+            clearInterval(textAnimationIntervals[elementId]);
+            delete textAnimationIntervals[elementId]; // Clean up
         }
     }, speed);
 }
@@ -378,14 +389,14 @@ function showSidebar(star) {
     const starPlanetsMoonsElement = document.getElementById("star-planets-moons");
     const starDangerLevelElement = document.getElementById("star-danger-level");
 
-    // Animate text appearance with different speeds
-    animateHTMLElementText(starNameElement, star.name, 100);
-    starImageElement.src = star.image;
-    animateHTMLElementText(starDescriptionElement, star.description, 20);
-    animateHTMLElementText(starTypeElement, star.type, 100);
-    animateHTMLElementText(starAgeElement, star.age, 100);
-    animateHTMLElementText(starPlanetsMoonsElement, star.planets, 100);
-    animateHTMLElementText(starDangerLevelElement, star.dangerLevel, 100);
+    // Animate text appearance with different speeds using element IDs
+    animateHTMLElementText("star-name", star.name, 100);
+    document.getElementById("star-image").src = star.image;
+    animateHTMLElementText("star-description", star.description, 15);
+    animateHTMLElementText("star-type", star.type, 100);
+    animateHTMLElementText("star-age", star.age, 100);
+    animateHTMLElementText("star-planets-moons", star.planets, 100);
+    animateHTMLElementText("star-danger-level", star.dangerLevel, 100);
 
     document.getElementById("star-image").src = star.image;
 

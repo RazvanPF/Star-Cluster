@@ -2,14 +2,12 @@
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, antialias: true });
 const updateInterval = 100; // Update every 100 milliseconds
-const baseSpeed = 0.01;
 const overlay = document.getElementById("overlay");
 engine.setHardwareScalingLevel(1 / window.devicePixelRatio);
 let stopUpdatingTarget = false;
 
 // Declared Variables - LETs
 let hasArrived = false; // Flag to track if the spaceship has arrived
-let isPlaying = true;
 let speedMultiplier = 1.0; // initial speed multiplier
 let targetPosition = null;
 let pickResult = null;
@@ -17,8 +15,6 @@ let currentLitPlanet = null;
 let planetLight = null;
 let intervalId = null;
 let celestialBodies = []; // Define celestialBodies array
-let alphaCentauriA; // Declare Alpha Centauri A globally
-let baseTime = Date.now();
 let lastPickedMesh = null;
 let orbitMeshes = [];
 let simulationSpeed = 1;
@@ -105,6 +101,73 @@ function loadModel(url, scene, scaling = 1) {
             reject(exception || message);
         });
     });
+}
+
+function setupAccretionDiskEffect(scene, manualOffset = 4) {
+    const star = celestialBodies.find(body => body.data.name === "HDE226868")?.mesh;
+    const blackHole = celestialBodies.find(body => body.data.name === "Cygnus-X1")?.mesh;
+
+    if (star && blackHole) {
+        const particleSystem = new BABYLON.ParticleSystem("particles", 2000, scene);
+        particleSystem.particleTexture = new BABYLON.Texture("https://assets.babylonjs.com/textures/flare.png", scene);
+        particleSystem.addColorGradient(0.0, new BABYLON.Color4(0.2, 0.5, 1.0, 1.0));
+        particleSystem.addColorGradient(0.7, new BABYLON.Color4(0.2, 0.5, 1.0, 1.0));
+        particleSystem.addColorGradient(1.0, new BABYLON.Color4(1.0, 0.2, 0.0, 0.0));
+
+        const discParticleSystem = new BABYLON.ParticleSystem("discParticles", 2000, scene);
+        discParticleSystem.particleTexture = new BABYLON.Texture("https://assets.babylonjs.com/textures/flare.png", scene);
+        let discEmitter = new BABYLON.CylinderParticleEmitter();
+        discEmitter.radius = 4;
+        discEmitter.height = 0.1;
+        discParticleSystem.particleEmitterType = discEmitter;
+
+        scene.registerBeforeRender(() => {
+            let direction = blackHole.position.subtract(star.position).normalize();
+            let trailOffset = direction.scale(manualOffset);
+            let discOffset = direction.scale(manualOffset); // Adjust this offset if needed
+
+            particleSystem.emitter = star.position.add(trailOffset);
+            discParticleSystem.emitter = star.position.add(discOffset); // Update to move with the star
+
+            particleSystem.direction1 = direction.scale(5);
+            particleSystem.direction2 = direction.scale(5);
+            star.renderingGroupId = 1;
+        });
+
+        setupParticleSystemProperties(particleSystem);
+        setupDiscParticleSystemProperties(discParticleSystem);
+
+        particleSystem.start();
+        discParticleSystem.start();
+    } else {
+        console.error("Required celestial bodies are not loaded yet.");
+    }
+}
+
+function setupParticleSystemProperties(particleSystem) {
+    particleSystem.minSize = 0.25;
+    particleSystem.maxSize = 0.6;
+    particleSystem.minLifeTime = 2.0;
+    particleSystem.maxLifeTime = 3.5;
+    particleSystem.emitRate = 500;
+    particleSystem.minEmitPower = 0.5;
+    particleSystem.maxEmitPower = 1.0;
+    particleSystem.renderingGroupId = 1;
+}
+
+function setupDiscParticleSystemProperties(discParticleSystem) {
+    discParticleSystem.color1 = new BABYLON.Color4(0.5, 0.5, 1.0, 1.0);
+    discParticleSystem.color2 = new BABYLON.Color4(0.5, 0.5, 1.0, 0.1);
+    discParticleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0.0);
+    discParticleSystem.minSize = 0.25;
+    discParticleSystem.maxSize = 0.6;
+    discParticleSystem.minLifeTime = 1.0;
+    discParticleSystem.maxLifeTime = 2.0;
+    discParticleSystem.emitRate = 2000;
+    discParticleSystem.minEmitPower = 0;
+    discParticleSystem.maxEmitPower = 0.5;
+    discParticleSystem.updateSpeed = 0.01;
+    discParticleSystem.renderingGroupId = 1;
 }
 
 const createScene = function () {
@@ -276,6 +339,7 @@ const createScene = function () {
         blackHoleModel.position = new BABYLON.Vector3(0, 0, 0);
     
         // Ensure the black hole model is interactive
+        blackHoleModel.renderingGroupId = 1; // Assign higher rendering group for black hole
         blackHoleModel.isPickable = true; // Ensure the model is pickable
         blackHoleModel.actionManager = new BABYLON.ActionManager(scene);
         blackHoleModel.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, function () {
@@ -288,6 +352,7 @@ const createScene = function () {
         }));
     
         blackHoleModel.getChildMeshes().forEach((childMesh) => {
+            childMesh.renderingGroupId = 1;  // Ensure all child meshes also have the higher rendering group
             childMesh.isPickable = true;
             childMesh.actionManager = new BABYLON.ActionManager(scene);
             childMesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, function () {
@@ -815,6 +880,68 @@ const createScene = function () {
     initializeSidebar();
     createRings(scene);
 
+    Promise.all([
+        loadModel(blackHoleModelUrl, scene, 2).then(model => {
+            celestialBodies.push({ mesh: model, data: celestialData[0], angle: 0 });
+            return model; // Return the model for further chaining
+        }),
+        new Promise(resolve => {
+            celestialData.forEach((data, index) => {
+                if (data.name === "Cygnus-X1") {
+                    return; // Skip creating a sphere for Cygnus-X1
+                }
+                const planet = BABYLON.MeshBuilder.CreateSphere(`planet${index}`, { diameter: data.size * 2 }, scene);
+                const planetMaterial = new BABYLON.StandardMaterial(`planetMaterial${index}`, scene);
+                planetMaterial.diffuseTexture = new BABYLON.Texture(data.texture, scene);
+                planet.material = planetMaterial;
+                planetMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+                planet.position = new BABYLON.Vector3(data.distance, 0, 0);
+
+                // Set initial position of the planet
+                planet.position = new BABYLON.Vector3(data.distance, 0, 0);
+                data.visited = false; // Ensure the visited flag is set during initialization
+                celestialBodies.push({ mesh: planet, data, angle: 0 });
+
+                // Flip the planet upside down
+                planet.rotation.x = Math.PI; // Flipping the planet
+
+                // Add outline on hover for planets
+                planet.actionManager = new BABYLON.ActionManager(scene);
+                planet.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, function () {
+                    planet.renderOutline = true;
+                    planet.outlineWidth = 0.1;
+                    planet.outlineColor = BABYLON.Color3.White();
+                }));
+                planet.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, function () {
+                    planet.renderOutline = false;
+                }));
+                if (data.type === "star") {
+                    // Apply emissive texture and disable lighting
+                    planetMaterial.emissiveTexture = new BABYLON.Texture(data.texture, scene);
+                    planetMaterial.disableLighting = true;
+                    planet.material = planetMaterial;
+                    planetMaterial.backFaceCulling = false; // Ensure that the material is rendered from both sides
+                    planetMaterial.transparencyMode = BABYLON.Material.MATERIAL_OPAQUE; // Set transparency mode to opaque
+
+                    // Glow Layer
+                    const glowLayer = new BABYLON.GlowLayer("glow", scene);
+                    glowLayer.intensity = 1.5; // Adjust intensity as needed
+                    glowLayer.addIncludedOnlyMesh(planet);
+
+                    // Create sun rays
+                    createSunRays(scene, planet);
+
+                    // Create a point light at the star's position
+                    const starLight = new BABYLON.PointLight(`${data.name}Light`, planet.position, scene);
+                    starLight.intensity = 2; // Set the intensity of the light
+                }
+                resolve();
+            });
+        })
+    ]).then(() => {
+        setupAccretionDiskEffect(scene); // Ensure this is called after models are loaded
+    });
+
     return scene;
 };
 
@@ -871,7 +998,7 @@ function stopUpdatingTargetPosition() {
         intervalId = null;
     }
 }
-    
+
 // Update slider text
 function updateSliderText(sliderValue) {
     const speedFactor = ((sliderValue - 1) / 999) * 9.0 + 0.1; // This formula...My god...
@@ -887,6 +1014,7 @@ const cameraIcon = document.getElementById('cameraIcon');
 function hideUIElements() {
     document.getElementById('versionText').style.display = 'none';
     document.getElementById('sidebar').style.display = 'none';
+    document.getElementById('returnToClusterButton').style.display = 'none';
     cameraIcon.style.pointerEvents = 'none'; // Disable interactions
     cameraIcon.style.opacity = '0.5'; // Visually indicate it's disabled
 }
@@ -895,6 +1023,7 @@ function hideUIElements() {
 function showUIElements() {
     document.getElementById('versionText').style.display = 'block';
     document.getElementById('sidebar').style.display = 'block';
+    document.getElementById('returnToClusterButton').style.display = 'block';
     cameraIcon.style.pointerEvents = 'auto'; // Enable interactions
     cameraIcon.style.opacity = '1'; // Reset opacity
 }
@@ -933,3 +1062,16 @@ window.onload = () => {
     });
 };
 
+// Star Cluster return icon
+
+document.getElementById('returnToClusterButton').addEventListener('click', function() {
+    document.getElementById('returnPopup').style.display = 'block';
+});
+
+document.getElementById('confirmReturn').addEventListener('click', function() {
+    window.location.href = 'https://razvanpf.github.io/Star-Cluster/'; // Redirect to the root or index.html
+});
+
+document.getElementById('cancelReturn').addEventListener('click', function() {
+    document.getElementById('returnPopup').style.display = 'none';
+});
