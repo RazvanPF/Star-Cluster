@@ -46,7 +46,7 @@ window.addEventListener("load", function () {
     let progress = 0;
     const updateProgress = setInterval(() => {
         if (progress < 100) {
-            progress += 2; // Increment progress
+            progress += 1; // Increment progress
             loadingText.textContent = `Loading... ${progress}%`;
         }
         if (progress >= 100) {
