@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 position: new BABYLON.Vector3(30, -15, 0), 
                 size: 2, 
                 color: new BABYLON.Color3(0, 0, 1), 
-                system: "solarSystem5SIRIUS/solarsystem5.html",
+                system: "solarSystem5SIRIUS/solarsystem5.html", // adding sirius - comment for commit only - remove later
                 description: "Sirius, the brightest star in the night sky, is a binary system consisting of Sirius A, a main-sequence star, and Sirius B, a white dwarf. It is located in the Canis Major constellation.",
                 type: "Binary Star System (A1V, DA2)",
                 age: "200-300 million years",
