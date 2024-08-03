@@ -85,12 +85,6 @@ const meshNameToPlanetName = {
     "moon0_2": "Kepler-47 d"
 };
 
-function updateSimulationSpeed(sliderValue) {
-    // Map slider value (1 to 1000) to simulation speed (0.1 to 9.1)
-    simulationSpeed = ((sliderValue - 1) / 999) * 9.0 + 0.1;
-    updateSliderText(sliderValue);
-}
-
 const createScene = function () {
     const scene = new BABYLON.Scene(engine);
 
@@ -115,31 +109,31 @@ const createScene = function () {
     // Adjust panning sensitivity for right mouse drag
     camera.panningSensibility = 100; // Lower value makes dragging more sensitive
 
-// Event listener for right-click actions
-canvas.addEventListener("pointerdown", function (evt) {
-    if (evt.button === 2) { // Right mouse button
-        // Capture the current camera position and direction
-        const forwardVec = camera.getForwardRay().direction;
-        cameraTargetPosition = camera.position.add(forwardVec.scale(camera.radius));
-        
-        // Set the target to the calculated position
-        camera.setTarget(cameraTargetPosition);
-        camera.lockedTarget = null; // Ensure locked target is detached
-    }
-});
+    // Event listener for right-click actions
+    canvas.addEventListener("pointerdown", function (evt) {
+        if (evt.button === 2) { // Right mouse button
+            // Capture the current camera position and direction
+            const forwardVec = camera.getForwardRay().direction;
+            cameraTargetPosition = camera.position.add(forwardVec.scale(camera.radius));
+            
+            // Set the target to the calculated position
+            camera.setTarget(cameraTargetPosition);
+            camera.lockedTarget = null; // Ensure locked target is detached
+        }
+    });
 
     // Ensure camera rotation and panning sensitivity
     camera.inputs.attached.pointers.angularSensibilityX = 500;
     camera.inputs.attached.pointers.angularSensibilityY = 500;
 
-    // Move the ship to the target position
+    // Move to target
     function moveToTarget(targetPos, arrivalCallback) {
         targetPosition = targetPos.clone(); // Clone to avoid modifying the original target position
         onArrivalCallback = arrivalCallback;
         scene.registerBeforeRender(moveShip);
     }
 
-    // Move the ship to the target position 2
+    // Move the ship to the target position
     function moveShip() {
         if (targetPosition) {
             const direction = targetPosition.subtract(spaceship.position).normalize();
@@ -209,7 +203,7 @@ canvas.addEventListener("pointerdown", function (evt) {
         sunRays.decay = 0.96815;
         sunRays.weight = 0.58767;
         sunRays.density = 0.926;
-        sunRays.renderingGroupId = 0; // Ensure the rendering group ID is 0
+        sunRays.renderingGroupId = 0;
     }
 
     const createRings = (scene) => {
@@ -243,21 +237,6 @@ canvas.addEventListener("pointerdown", function (evt) {
             }
         });
     };
-
-    // Create the 3D path for an inclined and eccentric orbit
-    function createOrbitPath(distance, eccentricity, inclination, scene) {
-        const points = [];
-        const numPoints = 128;
-        for (let i = 0; i <= numPoints; i++) {
-            const angle = 2 * Math.PI * (i / numPoints);
-            const r = distance * (1 - eccentricity ** 2) / (1 + eccentricity * Math.cos(angle));
-            const x = r * Math.cos(angle);
-            const y = r * Math.sin(angle) * Math.sin(BABYLON.Tools.ToRadians(inclination));
-            const z = r * Math.sin(angle) * Math.cos(BABYLON.Tools.ToRadians(inclination));
-            points.push(new BABYLON.Vector3(x, y, z));
-        }
-        return new BABYLON.Path3D(points);
-    }
 
     // Create celestial bodies
     celestialData.forEach((data, index) => {
@@ -296,9 +275,9 @@ canvas.addEventListener("pointerdown", function (evt) {
             planetMaterial.backFaceCulling = false; // Ensure that the material is rendered from both sides
             planetMaterial.transparencyMode = BABYLON.Material.MATERIAL_OPAQUE; // Set transparency mode to opaque
 
-            // Adjust the color for Proxima Centauri
+            // Adjust the color for Kepler-47 B
             if (data.name === "Kepler-47 B") {
-                planetMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color for Proxima Centauri
+                planetMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0);
             }
     
             // Glow Layer
@@ -355,42 +334,18 @@ canvas.addEventListener("pointerdown", function (evt) {
         const deltaTime = engine.getDeltaTime() * 0.001; // Default to 16ms if not defined
     
         celestialBodies.forEach((body) => {
-            if (body.data.name === "Ceres" || body.data.name === "Pluto" || body.data.name === "Haumea" || body.data.name === "Makemake" || body.data.name === "Eris") {
-                const distance = body.data.distance;
-                const inclination = BABYLON.Tools.ToRadians(body.data.inclination);
-                const eccentricity = body.data.eccentricity;
-                const angle = (Date.now() * body.data.orbitSpeed * speedMultiplier * simulationSpeed) % (2 * Math.PI);
-                const r = distance * (1 - eccentricity ** 2) / (1 + eccentricity * Math.cos(angle));
-                body.mesh.position.x = r * Math.cos(angle);
-                body.mesh.position.y = r * Math.sin(angle) * Math.sin(inclination);
-                body.mesh.position.z = r * Math.sin(angle) * Math.cos(inclination);
-            } else {
                 const distance = body.data.distance;
                 const angle = (Date.now() * body.data.orbitSpeed * speedMultiplier * simulationSpeed) % (2 * Math.PI);
                 body.mesh.position.x = distance * Math.cos(angle);
                 body.mesh.position.z = distance * Math.sin(angle);
-            }
-    
             // Rotation around own axis
-            if (body.data.name === "Venus") {
-                body.mesh.rotation.y += body.data.rotationSpeed * simulationSpeed * 0.01; // Clockwise rotation
-            } else if (body.data.name === "Uranus") {
-                body.mesh.rotation.z += body.data.rotationSpeed * simulationSpeed * 0.01; // Rolling rotation
-            } else {
                 body.mesh.rotation.y -= body.data.rotationSpeed * simulationSpeed * 0.01; // Counter-clockwise rotation
-            }
         });
     
         // Animate moons around their planets
         moons.forEach((moon) => {
             const distance = moon.data.distance;
-            
-            // Check if the moon is Triton to reverse its orbit direction
-            if (moon.data.name === "Triton") {
-                moon.angle -= moon.data.orbitSpeed * simulationSpeed * deltaTime; // Reverse direction for Triton
-            } else {
                 moon.angle += moon.data.orbitSpeed * simulationSpeed * deltaTime; // Normal direction for other moons
-            }
         
             // Update moon position
             moon.mesh.position.x = moon.parent.position.x + distance * Math.cos(moon.angle);
@@ -399,15 +354,6 @@ canvas.addEventListener("pointerdown", function (evt) {
         
             // Rotation around own axis
             moon.mesh.rotation.y -= moon.data.rotationSpeed * simulationSpeed * 0.01; // Counter-clockwise rotation
-        
-            // Ensure specific moons always face the parent planet (tidal locking)
-            const tidallyLockedMoons = ["Moon", "Oberon", "Miranda", "Triton", "Titania", "Charon"];
-            if (tidallyLockedMoons.includes(moon.data.name)) {
-                moon.mesh.lookAt(moon.parent.position);
-            } else {
-                // Normal rotation for other moons
-                moon.mesh.rotation.y -= moon.data.rotationSpeed * simulationSpeed * 0.01; // Counter-clockwise rotation
-            }
         });
     });
 
@@ -539,9 +485,6 @@ canvas.addEventListener("pointerdown", function (evt) {
         function handleCanvasClick(evt) {
             pickResult = scene.pick(evt.clientX, evt.clientY);
             if (pickResult.hit && pickResult.pickedMesh) {
-                console.log("Picked mesh:", pickResult.pickedMesh.name);
-                console.log("Picked point:", pickResult.pickedPoint);
-        
                 targetPosition = pickResult.pickedPoint;
                 spaceship.lookAt(targetPosition);
                 particleSystem.start();
@@ -553,7 +496,7 @@ canvas.addEventListener("pointerdown", function (evt) {
                 hasArrived = false;
         
                 // Check if the target is a planet, moon, sun, or Voyager
-                if (pickResult.pickedMesh.name.startsWith("planet") || pickResult.pickedMesh.name.startsWith("moon") || pickResult.pickedMesh.name === "AlphaCentauriA" || pickResult.pickedMesh.name === "AlphaCentauriB" || pickResult.pickedMesh.name === "ProximaCentauri") {
+                if (pickResult.pickedMesh.name.startsWith("planet") || pickResult.pickedMesh.name.startsWith("moon") ) {
                     lastPickedMesh = pickResult.pickedMesh; // Store the last picked mesh
                     startUpdatingTargetPosition(pickResult.pickedMesh);
                 } else {
@@ -917,13 +860,6 @@ engine.runRenderLoop(() => {
             intervalId = null;
         }
     }
-
-// Update slider text
-function updateSliderText(sliderValue) {
-    const speedFactor = ((sliderValue - 1) / 999) * 9.0 + 0.1; // This formula...My god...
-    const speedText = speedFactor.toFixed(1) + "x"; // Format to 1 decimal place
-    document.getElementById("speedDisplay").innerText = speedText;
-}
 
 //Screenshot//
 const camera = scene.activeCamera; // Or however you reference your camera
