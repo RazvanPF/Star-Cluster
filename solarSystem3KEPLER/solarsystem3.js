@@ -25,6 +25,7 @@ let simulationSpeed = 1;
 let spaceship = null;
 let particleSystem = null;
 let moons = [];
+let cameraTargetPosition = null;
 
 overlay.style.display = "block"; // Show the overlay
 
@@ -114,14 +115,18 @@ const createScene = function () {
     // Adjust panning sensitivity for right mouse drag
     camera.panningSensibility = 100; // Lower value makes dragging more sensitive
 
-    // Event listeners for right-click actions
-    canvas.addEventListener("pointerdown", function (evt) {
-        if (evt.button === 2) { // Right mouse button
-            // Detach the camera from any attached body
-            camera.setTarget(new BABYLON.Vector3(0, 0, 0));
-            camera.lockedTarget = null; // Ensure locked target is detached
-        }
-    });
+// Event listener for right-click actions
+canvas.addEventListener("pointerdown", function (evt) {
+    if (evt.button === 2) { // Right mouse button
+        // Capture the current camera position and direction
+        const forwardVec = camera.getForwardRay().direction;
+        cameraTargetPosition = camera.position.add(forwardVec.scale(camera.radius));
+        
+        // Set the target to the calculated position
+        camera.setTarget(cameraTargetPosition);
+        camera.lockedTarget = null; // Ensure locked target is detached
+    }
+});
 
     // Ensure camera rotation and panning sensitivity
     camera.inputs.attached.pointers.angularSensibilityX = 500;
