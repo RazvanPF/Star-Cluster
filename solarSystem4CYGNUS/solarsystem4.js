@@ -189,7 +189,6 @@ const createScene = function () {
     // Adjust panning sensitivity for right mouse drag
     camera.panningSensibility = 100; // Lower value makes dragging more sensitive
 
-// Event listeners for right-click actions
 // Event listener for right-click actions
 canvas.addEventListener("pointerdown", function (evt) {
     if (evt.button === 2) { // Right mouse button
