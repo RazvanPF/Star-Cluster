@@ -1,5 +1,8 @@
 # Star Cluster with multiple solar systems simulated
 
+![screenshot (5)](https://github.com/user-attachments/assets/63a99269-5832-4d18-a51a-3dd08ced2aa7)
+
+
 Welcome to the Star Cluster project! This simulation uses Babylon.js to render a 3D representation of our solar system and other known solar systems complete with planets, moons, asteroids, and dynamic events. Users can explore the systems by firstly choosing a desired star system to visit and then navigating the spaceship and interacting with celestial bodies.
 
 ## Features
