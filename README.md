@@ -20,6 +20,7 @@ Welcome to the Star Cluster project! This simulation uses Babylon.js to render a
 - **Sun Rays and Glow Effects**: Experience enhanced visuals with glow layers and volumetric light scattering effects around the sun.
 - **Planetary Orbits**: View planetary orbits and toggle their visibility for a clear understanding of each planet's path.
 - **Welcome Popup**: Initial overlay and welcome popup with navigation instructions for new users.
+- **Screenshot**: Screenshot functionality that hides the UI elements and allows you to save a snapshot of the system from your desired angle and position.
 
 ## Getting Started
 
