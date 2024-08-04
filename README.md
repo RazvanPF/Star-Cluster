@@ -13,7 +13,6 @@ Welcome to the Star Cluster project! This simulation uses Babylon.js to render a
 - **Lens Flare Effects**: Dwarf planets and Voyager feature blinking lights to simulate lens flare effects.
 - **Adjustable Simulation Speed**: Use the slider to adjust the simulation speed for a faster or slower exploration experience.
 - **Collision Detection**: Enabled collision detection for realistic interactions between objects.
-- **Screenshot Functionality**: Capture screenshots of the current view with a simple click of the camera icon.
 - **Sidebar Discovery List**: Track discovered celestial bodies in the sidebar, automatically updated as you explore.
 - **Comprehensive UI Controls**: Interactive UI for speed adjustment, simulation controls, and navigation.
 - **Background with Twinkling Stars**: Immerse yourself in a starry background with a realistic twinkling effect.
